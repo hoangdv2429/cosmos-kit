@@ -1,5 +1,5 @@
 {
-  "name": "@cosmos-kit/xion",
+  "name": "@cosmos-kit/xion-extension",
   "version": "0.0.1",
   "description": "cosmos-kit wallet connector",
   "author": "hoang@decentrio.ventures",
@@ -46,13 +46,19 @@
   "keywords": [
     "cosmos-kit",
     "cosmos",
-    "leap",
+    "xion",
     "wallet"
   ],
   "bugs": {
     "url": "https://github.com/cosmology-tech/cosmos-kit/issues"
   },
   "dependencies": {
+    "@chain-registry/keplr": "1.28.0",
+    "@cosmos-kit/core": "^2.8.9"
+  },
+  "peerDependencies": {
+    "@cosmjs/amino": ">=0.32.2",
+    "@cosmjs/proto-signing": ">=0.32.2"
   },
   "gitHead": "2b5f2de5d9ed1580be4137736dfc6cce779679d1"
 }
