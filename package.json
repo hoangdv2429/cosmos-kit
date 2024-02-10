@@ -50,5 +50,6 @@
   },
   "dependencies": {
     "@leapwallet/cosmos-social-login-capsule-provider-ui": "^0.0.46"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }

@@ -1,6 +1,6 @@
-import { ClientNotExistError } from '@cosmos-kit/core';
+import { ClientNotExistError } from "@cosmos-kit/core";
 
-import { Xion } from './types';
+import { Xion } from "./types";
 
 interface XionWindow {
   xion?: Xion;
@@ -9,7 +9,7 @@ interface XionWindow {
 export const getXionFromExtension: () => Promise<
   Xion | undefined
 > = async () => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return void 0;
   }
 
@@ -19,7 +19,7 @@ export const getXionFromExtension: () => Promise<
     return xion;
   }
 
-  if (document.readyState === 'complete') {
+  if (document.readyState === "complete") {
     if (xion) {
       return xion;
     } else {
@@ -31,17 +31,17 @@ export const getXionFromExtension: () => Promise<
     const documentStateChange = (event: Event) => {
       if (
         event.target &&
-        (event.target as Document).readyState === 'complete'
+        (event.target as Document).readyState === "complete"
       ) {
         if (xion) {
           resolve(xion);
         } else {
           reject(ClientNotExistError.message);
         }
-        document.removeEventListener('readystatechange', documentStateChange);
+        document.removeEventListener("readystatechange", documentStateChange);
       }
     };
 
-    document.addEventListener('readystatechange', documentStateChange);
+    document.addEventListener("readystatechange", documentStateChange);
   });
 };

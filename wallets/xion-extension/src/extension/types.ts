@@ -3,11 +3,11 @@ import {
   OfflineAminoSigner,
   StdSignature,
   StdSignDoc,
-} from '@cosmjs/amino';
-import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
-import { DirectSignResponse } from '@cosmjs/proto-signing';
-import { BroadcastMode } from '@cosmos-kit/core';
-import type { ChainInfo } from '@keplr-wallet/types';
+} from "@cosmjs/amino";
+import { OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
+import { DirectSignResponse } from "@cosmjs/proto-signing";
+import { BroadcastMode } from "@cosmos-kit/core";
+import type { ChainInfo } from "@keplr-wallet/types";
 
 export interface Key {
   readonly name: string;
@@ -31,7 +31,7 @@ export interface Xion {
   enable(chainIds: string | string[]): Promise<void>;
   suggestToken(chainId: string, contractAddress: string): Promise<void>;
   suggestCW20Token(chainId: string, contractAddress: string): Promise<void>;
-  mode: 'extension';
+  mode: "extension";
   getKey(chainId: string): Promise<Key>;
   getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
   getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner;

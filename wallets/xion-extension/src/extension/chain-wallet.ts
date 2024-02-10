@@ -1,4 +1,4 @@
-import { ChainRecord, ChainWalletBase, Wallet } from '@cosmos-kit/core';
+import { ChainRecord, ChainWalletBase, Wallet } from "@cosmos-kit/core";
 
 export class ChainXionExtension extends ChainWalletBase {
   constructor(walletInfo: Wallet, chainInfo: ChainRecord) {

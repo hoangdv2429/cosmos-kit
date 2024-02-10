@@ -1,9 +1,9 @@
-import { Wallet } from '@cosmos-kit/core';
-import { MainWalletBase } from '@cosmos-kit/core';
+import { Wallet } from "@cosmos-kit/core";
+import { MainWalletBase } from "@cosmos-kit/core";
 
-import { ChainXionExtension } from './chain-wallet';
-import { XionClient } from './client';
-import { getXionFromExtension } from './utils';
+import { ChainXionExtension } from "./chain-wallet";
+import { XionClient } from "./client";
+import { getXionFromExtension } from "./utils";
 
 export class XionExtensionWallet extends MainWalletBase {
   constructor(walletInfo: Wallet) {

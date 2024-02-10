@@ -1,4 +1,4 @@
-import { xionExtensionInfo, XionExtensionWallet } from './extension';
+import { xionExtensionInfo, XionExtensionWallet } from "./extension";
 
 const xionExtension = new XionExtensionWallet(xionExtensionInfo);
 
