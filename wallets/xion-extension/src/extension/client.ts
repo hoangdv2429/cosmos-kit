@@ -1,20 +1,22 @@
-import { chainRegistryChainToKeplr } from '@chain-registry/keplr';
-import { StdSignature, StdSignDoc } from '@cosmjs/amino';
-import { Algo, OfflineDirectSigner } from '@cosmjs/proto-signing';
+import { chainRegistryChainToKeplr } from "@chain-registry/keplr";
+import { Algo, OfflineSigner } from "@cosmjs/proto-signing";
 import {
   BroadcastMode,
   ChainRecord,
   ExtendedHttpEndpoint,
   SignType,
   SuggestToken,
-} from '@cosmos-kit/core';
-import { DirectSignDoc, SignOptions, WalletClient } from '@cosmos-kit/core';
+} from "@cosmos-kit/core";
+import { DirectSignDoc, SignOptions, WalletClient } from "@cosmos-kit/core";
 
-import { Xion } from './types';
-import Long from 'long';
+import { Xion } from "./types";
+import Long from "long";
+import { AAClient } from "@burnt-labs/signers";
 
 export class XionClient implements WalletClient {
   readonly client: Xion;
+  readonly abstractClient: AAClient;
+
   private _defaultSignOptions: SignOptions = {
     preferNoSetFee: false,
     preferNoSetMemo: true,
@@ -29,8 +31,11 @@ export class XionClient implements WalletClient {
     this._defaultSignOptions = options;
   }
 
-  constructor(client: Xion) {
+  constructor(client: Xion, aaClient: AAClient) {
+    // default signingCosmwasmClient
     this.client = client;
+    // account abstraction Client
+    this.abstractClient = aaClient;
   }
 
   async enable(chainIds: string | string[]) {
@@ -38,13 +43,14 @@ export class XionClient implements WalletClient {
   }
 
   async suggestToken({ chainId, tokens, type }: SuggestToken) {
-    if (type === 'cw20') {
+    if (type === "cw20") {
       for (const { contractAddress } of tokens) {
         await this.client.suggestCW20Token(chainId, contractAddress);
       }
     }
   }
 
+  // TODO: remove, no chain other than Burnt
   async addChain(chainInfo: ChainRecord) {
     const suggestChain = chainRegistryChainToKeplr(
       chainInfo.chain,
@@ -71,7 +77,7 @@ export class XionClient implements WalletClient {
   async getSimpleAccount(chainId: string) {
     const { address, username } = await this.getAccount(chainId);
     return {
-      namespace: 'cosmos',
+      namespace: "cosmos",
       chainId,
       address,
       username,
@@ -90,45 +96,8 @@ export class XionClient implements WalletClient {
   }
 
   getOfflineSigner(chainId: string, preferredSignType?: SignType) {
-    switch (preferredSignType) {
-      case 'amino':
-        return this.getOfflineSignerAmino(chainId);
-      case 'direct':
-        return this.getOfflineSignerDirect(chainId);
-      default:
-        return this.getOfflineSignerAmino(chainId);
-    }
-    // return this.client.getOfflineSignerAuto(chainId);
-  }
-
-  getOfflineSignerAmino(chainId: string) {
-    return this.client.getOfflineSignerOnlyAmino(chainId);
-  }
-
-  getOfflineSignerDirect(chainId: string) {
-    return this.client.getOfflineSigner(chainId) as OfflineDirectSigner;
-  }
-
-  async signAmino(
-    chainId: string,
-    signer: string,
-    signDoc: StdSignDoc,
-    signOptions?: SignOptions
-  ) {
-    return await this.client.signAmino(
-      chainId,
-      signer,
-      signDoc,
-      signOptions || this.defaultSignOptions
-    );
-  }
-
-  async signArbitrary(
-    chainId: string,
-    signer: string,
-    data: string | Uint8Array
-  ): Promise<StdSignature> {
-    return await this.client.signArbitrary(chainId, signer, data);
+    // only direct offline signer for now
+    return this.abstractClient.abstractSigner as OfflineSigner;
   }
 
   async signDirect(
@@ -137,18 +106,10 @@ export class XionClient implements WalletClient {
     signDoc: DirectSignDoc,
     signOptions?: SignOptions
   ) {
-    return await this.client.signDirect(
-      chainId,
-      signer,
-      {
-        ...signDoc,
-        accountNumber: Long.fromString(signDoc.accountNumber.toString()),
-      },
-      signOptions || this.defaultSignOptions
-    );
-  }
-
-  async sendTx(chainId: string, tx: Uint8Array, mode: BroadcastMode) {
-    return await this.client.sendTx(chainId, tx, mode);
+    // TODO: remove the convert from bigint to long (upstream lib use bigint instead of long)
+    return this.abstractClient.abstractSigner.signDirect(signer, {
+      ...signDoc,
+      accountNumber: Long.fromString(signDoc.accountNumber.toString()),
+    });
   }
 }

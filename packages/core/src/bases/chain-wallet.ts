@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions */
+import { AASigner } from '@burnt-labs/signers';
 import { SigningCosmWasmClientOptions } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
 import {
@@ -20,9 +21,9 @@ import {
   State,
   Wallet,
 } from '../types';
+import { ConnectError } from '../utils';
 import type { MainWalletBase } from './main-wallet';
 import { WalletBase } from './wallet';
-import { ConnectError } from '../utils';
 
 export class ChainWalletBase extends WalletBase {
   mainWallet: MainWalletBase;
@@ -359,12 +360,31 @@ export class ChainWalletBase extends WalletBase {
     );
   };
 
+  getAAClient = async () => {
+    const rpcEndpoint = await this.getRpcEndpoint();
+
+    if (!this.offlineSigner) {
+      await this.initOfflineSigner();
+    }
+
+    // create AASigner from OfflineSigner
+
+    const { AAClient } = await import('@burnt-labs/signers');
+    return AAClient.connectWithSigner(
+      rpcEndpoint as string,
+      this.offlineSigner as AASigner,
+      this.signingStargateOptions
+    );
+  };
+
   protected getSigningClient = async (type?: CosmosClientType) => {
     switch (type) {
       case 'stargate':
         return await this.getSigningStargateClient();
       case 'cosmwasm':
         return await this.getSigningCosmWasmClient();
+      case 'abstract':
+        return await this.getAAClient();
       default:
         return this.getSigningStargateClient();
     }
@@ -384,7 +404,7 @@ export class ChainWalletBase extends WalletBase {
 
     let gasPrice: GasPrice | undefined;
     switch (type) {
-      case 'stargate':
+      case 'stargate' || 'abstract':
         gasPrice = this.signingStargateOptions?.gasPrice;
         break;
       case 'cosmwasm':
@@ -438,7 +458,7 @@ export class ChainWalletBase extends WalletBase {
 
     let timeoutMs: number | undefined, pollIntervalMs: number | undefined;
     switch (type) {
-      case 'stargate':
+      case 'stargate' || 'abstract':
         timeoutMs = this.signingStargateOptions?.broadcastTimeoutMs;
         pollIntervalMs = this.signingStargateOptions?.broadcastPollIntervalMs;
         break;

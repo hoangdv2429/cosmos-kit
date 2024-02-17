@@ -54,7 +54,7 @@ export interface DappEnv {
   browser?: BrowserName;
 }
 
-export type CosmosClientType = 'stargate' | 'cosmwasm';
+export type CosmosClientType = 'stargate' | 'cosmwasm' | 'abstract';
 export type SignType = 'amino' | 'direct';
 
 export type LogLevel = 'TRACE' | 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'NONE';
