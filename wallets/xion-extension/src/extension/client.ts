@@ -11,11 +11,13 @@ import { DirectSignDoc, SignOptions, WalletClient } from "@cosmos-kit/core";
 
 import { Xion } from "./types";
 import Long from "long";
-import { AAClient } from "@burnt-labs/signers";
+import { GranteeSignerClient } from "@burnt-labs/abstraxion-core";
+import { AADirectSigner, AASigner } from '@burnt-labs/signers';}
 
 export class XionClient implements WalletClient {
   readonly client: Xion;
-  readonly abstractClient: AAClient;
+  readonly granteeSignerClient: GranteeSignerClient;
+  readonly AASigner: AADirectSigner;
 
   private _defaultSignOptions: SignOptions = {
     preferNoSetFee: false,
@@ -31,11 +33,11 @@ export class XionClient implements WalletClient {
     this._defaultSignOptions = options;
   }
 
-  constructor(client: Xion, aaClient: AAClient) {
+  constructor(client: Xion, granteeSignerClient: GranteeSignerClient) {
     // default signingCosmwasmClient
     this.client = client;
-    // account abstraction Client
-    this.abstractClient = aaClient;
+    // granteeSignerClient
+    this.granteeSignerClient = granteeSignerClient;
   }
 
   async enable(chainIds: string | string[]) {
@@ -97,7 +99,7 @@ export class XionClient implements WalletClient {
 
   getOfflineSigner(chainId: string, preferredSignType?: SignType) {
     // only direct offline signer for now
-    return this.abstractClient.abstractSigner as OfflineSigner;
+    return this.AASigner.signer as OfflineSigner;
   }
 
   async signDirect(
@@ -107,7 +109,7 @@ export class XionClient implements WalletClient {
     signOptions?: SignOptions
   ) {
     // TODO: remove the convert from bigint to long (upstream lib use bigint instead of long)
-    return this.abstractClient.abstractSigner.signDirect(signer, {
+    return this.AASigner.signDirect(signer, {
       ...signDoc,
       accountNumber: Long.fromString(signDoc.accountNumber.toString()),
     });

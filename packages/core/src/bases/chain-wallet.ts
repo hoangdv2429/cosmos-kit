@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-expressions */
-import { AASigner } from '@burnt-labs/signers';
 import { SigningCosmWasmClientOptions } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
 import {
@@ -360,19 +359,17 @@ export class ChainWalletBase extends WalletBase {
     );
   };
 
-  getAAClient = async () => {
+  getGranteeSignerClient = async () => {
     const rpcEndpoint = await this.getRpcEndpoint();
 
     if (!this.offlineSigner) {
       await this.initOfflineSigner();
     }
 
-    // create AASigner from OfflineSigner
-
-    const { AAClient } = await import('@burnt-labs/signers');
-    return AAClient.connectWithSigner(
+    const { GranteeSignerClient } = await import('@burnt-labs/abstraxion-core');
+    return GranteeSignerClient.connectWithSigner(
       rpcEndpoint as string,
-      this.offlineSigner as AASigner,
+      this.offlineSigner,
       this.signingStargateOptions
     );
   };
@@ -384,7 +381,7 @@ export class ChainWalletBase extends WalletBase {
       case 'cosmwasm':
         return await this.getSigningCosmWasmClient();
       case 'abstract':
-        return await this.getAAClient();
+        return await this.getGranteeSignerClient();
       default:
         return this.getSigningStargateClient();
     }
