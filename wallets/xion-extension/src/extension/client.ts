@@ -10,9 +10,9 @@ import {
 import { DirectSignDoc, SignOptions, WalletClient } from "@cosmos-kit/core";
 
 import { Xion } from "./types";
-import Long from "long";
 import { GranteeSignerClient } from "@burnt-labs/abstraxion-core";
-import { AADirectSigner, AASigner } from '@burnt-labs/signers';}
+import { AADirectSigner, AASigner } from "@burnt-labs/signers";
+import { DirectSignResponse } from "@cosmjs/proto-signing";
 
 export class XionClient implements WalletClient {
   readonly client: Xion;
@@ -107,11 +107,10 @@ export class XionClient implements WalletClient {
     signer: string,
     signDoc: DirectSignDoc,
     signOptions?: SignOptions
-  ) {
-    // TODO: remove the convert from bigint to long (upstream lib use bigint instead of long)
+  ): Promise<DirectSignResponse> {
     return this.AASigner.signDirect(signer, {
       ...signDoc,
-      accountNumber: Long.fromString(signDoc.accountNumber.toString()),
+      accountNumber: signDoc.accountNumber,
     });
   }
 }
