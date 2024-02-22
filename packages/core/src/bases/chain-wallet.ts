@@ -366,11 +366,20 @@ export class ChainWalletBase extends WalletBase {
       await this.initOfflineSigner();
     }
 
+    // TODO: assign right granter and grantee address here
+    const granteeSignerOptions = {
+      granterAddress: 'your-granter-address',
+      granteeAddress: 'your-grantee-address',
+    };
+
     const { GranteeSignerClient } = await import('@burnt-labs/abstraxion-core');
     return GranteeSignerClient.connectWithSigner(
       rpcEndpoint as string,
       this.offlineSigner,
-      this.signingStargateOptions
+      {
+        ...this.signingStargateOptions, // Spread existing options
+        ...granteeSignerOptions, // Add grantee signer options
+      }
     );
   };
 

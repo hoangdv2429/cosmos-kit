@@ -15,7 +15,12 @@ export class XionExtensionWallet extends MainWalletBase {
     try {
       // get the Xion-wallet from the web after signin/signup
       const xion = await getXionFromExtension();
-      this.initClientDone(xion ? new XionClient(xion) : undefined);
+      // TODO: init GranteeSignerClient
+      const granteeSignerClient = undefined;
+      // const granteeSignerClient = this.getGranteeSignerClient();
+      this.initClientDone(
+        xion ? new XionClient(xion, granteeSignerClient) : undefined
+      );
     } catch (error) {
       this.initClientError(error);
     }
