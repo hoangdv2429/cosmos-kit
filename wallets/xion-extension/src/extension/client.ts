@@ -1,11 +1,16 @@
 import { chainRegistryChainToKeplr } from "@chain-registry/keplr";
-import { Algo, OfflineSigner } from "@cosmjs/proto-signing";
+import {
+  Algo,
+  OfflineDirectSigner,
+  OfflineSigner,
+} from "@cosmjs/proto-signing";
 import {
   BroadcastMode,
   ChainRecord,
   ExtendedHttpEndpoint,
   SignType,
   SuggestToken,
+  WalletAccount,
 } from "@cosmos-kit/core";
 import { DirectSignDoc, SignOptions, WalletClient } from "@cosmos-kit/core";
 
@@ -17,7 +22,7 @@ import { DirectSignResponse } from "@cosmjs/proto-signing";
 export class XionClient implements WalletClient {
   readonly client: Xion;
   readonly granteeSignerClient: GranteeSignerClient;
-  readonly AASigner: AADirectSigner;
+  readonly aaClient: AASigner;
 
   private _defaultSignOptions: SignOptions = {
     preferNoSetFee: false,
@@ -86,29 +91,40 @@ export class XionClient implements WalletClient {
     };
   }
 
-  async getAccount(chainId: string) {
-    const key = await this.client.getKey(chainId);
+  getOfflineSigner(chainId: string, preferredSignType?: SignType) {
+    // only direct offline signer for now
+    if (preferredSignType !== "direct") {
+      throw new Error("Only direct signer is supported");
+    }
+    return this.getOfflineSignerDirect(chainId);
+  }
+
+  getOfflineSignerDirect(chainId: string): OfflineDirectSigner {
     return {
-      username: key.name,
-      address: key.bech32Address,
-      algo: key.algo as Algo,
-      pubkey: key.pubKey,
-      isNanoLedger: key.isNanoLedger,
+      getAccounts: async () => [await this.getAccount(chainId)],
+      signDirect: async (signer, signDoc) => {
+        return this.signDirect(chainId, signer, signDoc);
+      },
     };
   }
 
-  getOfflineSigner(chainId: string, preferredSignType?: SignType) {
-    // only direct offline signer for now
-    return this.AASigner.signer as OfflineSigner;
+  async getAccount(chainId: string): Promise<WalletAccount> {
+    const { address, pubkey } = await this.granteeSignerClient.getAccount(
+      chainId
+    );
+    return {
+      address,
+      algo: "secp256k1",
+      pubkey: pubkey.value,
+    };
   }
 
   async signDirect(
     chainId: string,
     signer: string,
-    signDoc: DirectSignDoc,
-    signOptions?: SignOptions
+    signDoc: DirectSignDoc
   ): Promise<DirectSignResponse> {
-    return this.AASigner.signDirect(signer, {
+    return this.aaClient.signDirect(signer, {
       ...signDoc,
       accountNumber: signDoc.accountNumber,
     });

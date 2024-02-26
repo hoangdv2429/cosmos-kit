@@ -8,7 +8,8 @@ import { OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
 import { DirectSignResponse } from "@cosmjs/proto-signing";
 import { BroadcastMode } from "@cosmos-kit/core";
 import type { ChainInfo } from "@keplr-wallet/types";
-import { AASigner } from "@burnt-labs/signers";
+import { GranteeSignerClient } from "@burnt-labs/abstraxion-core";
+import { AAClient } from "@burnt-labs/signers";
 
 export interface Key {
   readonly name: string;
@@ -26,7 +27,8 @@ export interface XionSignOptions {
 
 // this interface fit the web version of xion wallet
 export interface Xion {
-  abstractSigner: AASigner;
+  GranteeSignerClient: GranteeSignerClient;
+  AAClient: AAClient;
   defaultOptions: {
     sign?: XionSignOptions;
   };
